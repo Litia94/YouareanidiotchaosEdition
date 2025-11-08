@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>YouAreAnIdiot - Chaos Edition</title>
+    <style>
+        body {
+            /* 背景を黒にして、動画とメッセージが目立つように */
+            background-color: black; 
+            /* スクロールバーを非表示にし、画面いっぱいに */
+            overflow: hidden; 
+            margin: 0;
+            padding: 0;
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+        }
+        .moving-video {
+            /* 動画を絶対位置で指定し、自由に配置できるように */
+            position: absolute; 
+            width: 200px; /* 動画のサイズを設定 */
+            height: auto;
+            /* 動きを滑らかにするための設定 */
+            transition: all 5s linear; 
+        }
+        #actionButton {
+            /* ボタンを画面上部に固定 */
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1000; /* 最前面に表示 */
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .idiot-message {
+            /* メッセージを目立たせる */
+            position: absolute;
+            font-size: 30px;
+            color: yellow;
+            z-index: 500;
+            text-shadow: 2px 2px 5px black;
+            /* フェードアウト用 */
+            opacity: 1;
+            transition: opacity 2s ease-out; /* 2秒かけて透明になる */
+        }
+    </style>
+</head>
+<body>
+
+<button id="actionButton" onclick="startChaos()">START CHAOS</button>
+
+<script>
+    // 変更点: 動画ファイルのパス
+    const videoSrc = '1762595624384.mp4'; 
+    
+    // ⏰ 設定
+    const videoInterval = 1000; // 動画を増やす間隔 (1秒ごと)
+    const messageInterval = 200; // メッセージを増やす間隔 (0.2秒ごと)
+
+    /**
+     * 新しい動画要素を作成し、ランダムな位置に配置・再生する関数
+     */
+    function createAndPlayMovingVideo() {
+        const video = document.createElement('video');
+        
+        video.src = videoSrc;
+        video.className = 'moving-video';
+        
+        // ご要望の設定
+        video.loop = true;
+        video.muted = true;     // 自動再生のためにミュートは必須
+        video.autoplay = true;
+        video.playsinline = true;
+        
+        // 📏 ランダムな位置を計算
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const videoSize = 200; 
+
+        const randomX = Math.random() * (screenWidth - videoSize); 
+        const randomY = Math.random() * (screenHeight - videoSize); 
+
+        video.style.left = `${randomX}px`;
+        video.style.top = `${randomY}px`;
+        
+        document.body.appendChild(video);
+
+        // 🔊 再生開始
+        video.play().catch(error => {
+            console.warn('自動再生がブロックされました:', error);
+        });
+        
+        // ✨ 5秒ごとに位置をランダムに動かす
+        setInterval(() => {
+            const newRandomX = Math.random() * (screenWidth - videoSize);
+            const newRandomY = Math.random() * (screenHeight - videoSize);
+            
+            video.style.left = `${newRandomX}px`;
+            video.style.top = `${newRandomY}px`;
+        }, 5000);
+    }
+
+    /**
+     * 画面上に「You are an idiot！」メッセージを作成し、ランダムに配置する関数
+     */
+    function createIdiotMessage() {
+        const message = document.createElement('div');
+        message.textContent = "You are an idiot！";
+        message.className = 'idiot-message';
+        
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        // ランダムな位置を設定
+        const randomX = Math.random() * screenWidth;
+        const randomY = Math.random() * screenHeight;
+
+        message.style.left = `${randomX}px`;
+        message.style.top = `${randomY}px`;
+
+        document.body.appendChild(message);
+
+        // 0.5秒表示後にフェードアウトを開始し、消えたらDOMから削除
+        setTimeout(() => {
+            message.style.opacity = '0'; 
+            // transition (2秒) 後に完全に削除
+            setTimeout(() => {
+                message.remove();
+            }, 2500);
+        }, 500); 
+    }
+
+    /**
+     * 両方の非同期処理を開始する関数
+     */
+    function startChaos() {
+        // ボタンを無効化し、状態を示す
+        document.getElementById('actionButton').disabled = true;
+        document.getElementById('actionButton').textContent = 'CHAOS STARTED 😈';
+
+        // 1. 動画の無限増殖を開始 (メインスレッドをブロックしない)
+        setInterval(createAndPlayMovingVideo, videoInterval);
+        
+        // 2. メッセージの無限増殖を開始 (メインスレッドをブロックしない)
+        setInterval(createIdiotMessage, messageInterval); 
+    }
+</script>
+</body>
+</html>
